@@ -70,59 +70,6 @@ Qrypta focuses on **confidentiality, integrity, accountability, and least-privil
 
 ---
 
-## 🗂️ Project Structure
-
-```text
-Qrypta/
-│
-├── app/
-│   ├── admin/
-│   │   ├── models.py
-│   │   ├── routes.py
-│   │   └── services.py
-│   │
-│   ├── audit/
-│   │   ├── models.py
-│   │   ├── routes.py
-│   │   └── services.py
-│   │
-│   ├── auth/
-│   │   ├── models.py
-│   │   ├── routes.py
-│   │   └── services.py
-│   │
-│   ├── core/
-│   │   ├── encryption.py
-│   │   ├── otp.py
-│   │   ├── captcha.py
-│   │   ├── permissions.py
-│   │   ├── tokens.py
-│   │   ├── password_generator.py
-│   │   └── password_strength.py
-│   │
-│   ├── organizations/
-│   │   ├── departments/
-│   │   ├── invitations/
-│   │   ├── models.py
-│   │   ├── routes.py
-│   │   └── services.py
-│   │
-│   ├── users/
-│   ├── vault/
-│   ├── utils/
-│   ├── templates/
-│   ├── static/
-│   │   └── images/
-│   │
-│   ├── config.py
-│   ├── extensions.py
-│   └── __init__.py
-│
-├── requirements.txt
-├── run.py
-├── .gitignore
-└── README.md
-
 All folders users, vaults, utils have common files (models.py, routes.py and services.py)
 
 
@@ -224,3 +171,58 @@ Real-world backend architecture
 
 This project is intended for educational and demonstration purposes.
 Sensitive configurations and secrets must be handled securely before any production use.
+
+
+## 🗂️ Project Structure
+
+```text
+Qrypta/
+│
+├── app/
+│   ├── admin/
+│   │   ├── models.py
+│   │   ├── routes.py
+│   │   └── services.py
+│   │
+│   ├── audit/
+│   │   ├── models.py
+│   │   ├── routes.py
+│   │   └── services.py
+│   │
+│   ├── auth/
+│   │   ├── models.py
+│   │   ├── routes.py
+│   │   └── services.py
+│   │
+│   ├── core/
+│   │   ├── encryption.py
+│   │   ├── otp.py
+│   │   ├── captcha.py
+│   │   ├── permissions.py
+│   │   ├── tokens.py
+│   │   ├── password_generator.py
+│   │   └── password_strength.py
+│   │
+│   ├── organizations/
+│   │   ├── departments/
+│   │   ├── invitations/
+│   │   ├── models.py
+│   │   ├── routes.py
+│   │   └── services.py
+│   │
+│   ├── users/
+│   ├── vault/
+│   ├── utils/
+│   ├── templates/
+│   ├── static/
+│   │   └── images/
+│   │
+│   ├── config.py
+│   ├── extensions.py
+│   └── __init__.py
+│
+├── requirements.txt
+├── run.py
+├── .gitignore
+└── README.md
+
