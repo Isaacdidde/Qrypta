@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* =====================================================
+   ORG INVITE — SECURITY CHECKPOINT
+===================================================== */
+
+.invite-wrapper {
+    max-width: 520px;
+    margin: 80px auto;
+}
+
+.invite-panel {
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.06),
+        rgba(255,255,255,0.02)
+    );
+    border: 1px solid var(--border-soft);
+    border-radius: 22px;
+    padding: 32px;
+}
+
+/* ===============================
+   HEADER
+================================ */
+.invite-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: .4px;
+}
+
+.invite-sub {
+    color: var(--text-muted);
+    font-size: .9rem;
+}
+
+/* ===============================
+   DETAILS LIST
+================================ */
+.invite-details dt {
+    color: var(--text-muted);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+.invite-details dd {
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+/* ===============================
+   WARNING
+================================ */
+.invite-warning {
+    background: rgba(245,158,11,.12);
+    border: 1px solid rgba(245,158,11,.35);
+    color: #fbbf24;
+    border-radius: 14px;
+    font-size: .85rem;
+    padding: 14px 16px;
+}
+
+/* ===============================
+   ACTION BUTTONS
+================================ */
+.invite-actions .btn {
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: .85rem;
+}
+</style>
+
+<div class="invite-wrapper">
+
+    <div class="invite-panel">
+
+        <!-- ===============================
+             HEADER
+        ================================ -->
+        <div class="text-center mb-4">
+            <h4 class="invite-title mb-2">
+                Organization Invitation
+            </h4>
+            <div class="invite-sub">
+                You’ve been invited to join an organization
+            </div>
+        </div>
+
+        <!-- ===============================
+             DETAILS
+        ================================ -->
+        <dl class="row invite-details mb-4">
+
+            <dt class="col-4">Account</dt>
+            <dd class="col-8">
+                {{ invite.email }}
+            </dd>
+
+            <dt class="col-4">Assigned Role</dt>
+            <dd class="col-8">
+                {{ invite.role.replace('_', ' ').title() }}
+            </dd>
+
+            <dt class="col-4">Expires</dt>
+            <dd class="col-8">
+                {{ invite.expires_at.strftime("%Y-%m-%d %H:%M") }}
+            </dd>
+
+        </dl>
+
+        <!-- ===============================
+             WARNING
+        ================================ -->
+        <div class="invite-warning mb-4">
+            Accepting this invitation will permanently attach your account
+            to the organization and grant access based on the assigned role.
+        </div>
+
+        <!-- ===============================
+             ACTIONS
+        ================================ -->
+        <form method="post">
+            <div class="invite-actions d-flex justify-content-between">
+                <a href="{{ url_for('vault.dashboard') }}"
+                   class="btn btn-outline-light">
+                    Cancel
+                </a>
+
+                <button class="btn btn-primary">
+                    Accept Invitation
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

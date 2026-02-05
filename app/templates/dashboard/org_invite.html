@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* =====================================================
+   ORG INVITE — ENTERPRISE (FINAL)
+===================================================== */
+
+.invite-wrapper {
+    max-width: 680px;
+    margin: 80px auto 140px;
+}
+
+.invite-panel {
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.06),
+        rgba(255,255,255,0.02)
+    );
+    border: 1px solid var(--border-soft);
+    border-radius: 22px;
+    padding: 36px;
+}
+
+.invite-title {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.invite-sub {
+    color: var(--text-muted);
+    font-size: .9rem;
+}
+
+.form-label {
+    color: var(--text-muted);
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+.form-control,
+.form-select {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-soft);
+    color: var(--text-primary);
+    border-radius: 14px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.invite-fab {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #22d3ee);
+    color: #020617;
+    font-size: 34px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 16px 40px rgba(0,0,0,.55);
+    z-index: 999;
+}
+
+.cancel-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: .85rem;
+}
+.cancel-link:hover {
+    color: var(--text-primary);
+}
+/* FIX: dropdown options visibility */
+.form-select option {
+    background-color: #020617;   /* dark */
+    color: #e5e7eb;              /* light text */
+}
+
+/* hover / selected option */
+.form-select option:hover,
+.form-select option:checked {
+    background-color: #1e293b;
+    color: #ffffff;
+}
+
+</style>
+
+<div class="invite-wrapper">
+    <div class="invite-panel">
+
+        <h4 class="invite-title mb-2">Invite Member</h4>
+        <p class="invite-sub mb-4">
+            Invite a user to join your organization. They must accept the invitation.
+        </p>
+
+        <form id="invite-form" method="post"
+              action="{{ url_for('organizations.invite_member') }}">
+
+            <!-- NAME -->
+            <div class="mb-4">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-control"
+                       placeholder="John Doe" required>
+            </div>
+
+            <!-- EMAIL -->
+            <div class="mb-4">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control"
+                       placeholder="user@company.com" required>
+            </div>
+
+            <!-- DEPARTMENT -->
+            <div class="mb-4">
+                <label class="form-label">Department</label>
+                <select name="department" id="department"
+                        class="form-select" required
+                        onchange="updateRoles()">
+                    <option value="">Select Department</option>
+                    <option value="IT">IT</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="HR">HR</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Operations">Operations</option>
+                </select>
+            </div>
+
+            <!-- JOB ROLE (DYNAMIC) -->
+            <div class="mb-4">
+                <label class="form-label">Job Role</label>
+                <select name="job_role" id="job_role"
+                        class="form-select" required>
+                    <option value="">Select Department First</option>
+                </select>
+            </div>
+
+            <!-- ORG ROLE -->
+            <div class="mb-4">
+                <label class="form-label">Organization Role</label>
+                <select name="role" class="form-select">
+                    <option value="employee" selected>Employee</option>
+                    <option value="manager">Manager</option>
+                    <option value="business_admin">Administrator</option>
+                </select>
+            </div>
+
+            <a href="{{ url_for('organizations.dashboard') }}"
+               class="cancel-link">
+                ← Cancel and return to dashboard
+            </a>
+
+        </form>
+    </div>
+</div>
+
+<button class="invite-fab"
+        title="Send Invitation"
+        onclick="document.getElementById('invite-form').submit();">
+    +
+</button>
+
+<script>
+const rolesByDept = {
+    IT: [
+        "Java Developer","Frontend Developer","Backend Developer","Full Stack Developer",
+        "QA Engineer","Automation Tester","DevOps Engineer","Cloud Engineer",
+        "Security Analyst","Data Engineer","Database Administrator","System Administrator",
+        "Network Engineer","Site Reliability Engineer","Mobile App Developer",
+        "UI Engineer","Technical Lead","Engineering Manager","Software Architect"
+    ],
+    Marketing: [
+        "Digital Marketer","SEO Specialist","Content Strategist","Copywriter",
+        "Brand Manager","Growth Marketer","Social Media Manager","Performance Marketer",
+        "Marketing Analyst","Campaign Manager","Email Marketing Specialist",
+        "Product Marketer","Community Manager","Influencer Manager",
+        "Creative Director","Marketing Ops","CRM Specialist","Market Research Analyst"
+    ],
+    HR: [
+        "HR Executive","HR Manager","Talent Acquisition Specialist","Recruiter",
+        "People Operations","HR Business Partner","Payroll Specialist",
+        "Compensation Analyst","Learning & Development","HR Analyst",
+        "Employee Relations","HR Compliance Officer","Culture Manager",
+        "HR Generalist","Onboarding Specialist","HR Ops Manager"
+    ],
+    Sales: [
+        "Sales Executive","Account Executive","Business Development Manager",
+        "Sales Manager","Inside Sales","Enterprise Sales","Sales Engineer",
+        "Pre-Sales Consultant","Account Manager","Regional Sales Manager",
+        "Key Account Manager","Sales Analyst","Customer Success Manager",
+        "Revenue Operations","Channel Manager","Partnership Manager"
+    ],
+    Operations: [
+        "Operations Executive","Operations Manager","Program Manager",
+        "Project Manager","Process Analyst","Operations Analyst",
+        "Supply Chain Manager","Logistics Manager","Vendor Manager",
+        "Compliance Manager","Facilities Manager","Business Operations",
+        "Quality Manager","Risk Manager","Service Delivery Manager"
+    ]
+};
+
+function updateRoles() {
+    const dept = document.getElementById("department").value;
+    const roleSelect = document.getElementById("job_role");
+
+    roleSelect.innerHTML = "";
+
+    if (!rolesByDept[dept]) {
+        roleSelect.innerHTML = "<option>Select Department First</option>";
+        return;
+    }
+
+    rolesByDept[dept].forEach(role => {
+        const opt = document.createElement("option");
+        opt.value = role;
+        opt.textContent = role;
+        roleSelect.appendChild(opt);
+    });
+}
+</script>
+
+{% endblock %}

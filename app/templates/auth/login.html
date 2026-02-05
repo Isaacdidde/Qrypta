@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5" style="max-width: 480px;">
+
+    <!-- ==================================================
+         HEADER
+         ================================================== -->
+    <div class="mb-4 text-center">
+        <h2 class="mb-1">Sign in</h2>
+        <p class="text-muted mb-0">
+            Enter your email and password.<br>
+            A one-time verification code will be sent next.
+        </p>
+    </div>
+
+    <!-- ==================================================
+         FLASH MESSAGES
+         ================================================== -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close">
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- ==================================================
+         LOGIN FORM (PASSWORD STEP)
+         ================================================== -->
+    <form
+        method="post"
+        action="{{ url_for('auth.login', next=next) }}"
+        autocomplete="off"
+        novalidate
+    >
+        <div class="mb-3">
+            <label class="form-label">Email address</label>
+            <input
+                type="email"
+                name="email"
+                class="form-control"
+                placeholder="you@example.com"
+                required
+                autofocus
+            >
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input
+                type="password"
+                name="password"
+                class="form-control"
+                required
+            >
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Continue
+        </button>
+    </form>
+
+    <!-- ==================================================
+         PASSWORD RECOVERY
+         ================================================== -->
+    <div class="text-center mt-3">
+        <a
+            href="{{ url_for('auth.forgot_password') }}"
+            class="text-decoration-none"
+        >
+            Forgot your password?
+        </a>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- ==================================================
+         REGISTER (INVITE-SAFE)
+         ================================================== -->
+    <p class="mb-0 text-center text-muted">
+        Don’t have an account?
+        <a
+            href="{{ url_for('auth.register', next=next) }}"
+            class="text-decoration-none"
+        >
+            Create one
+        </a>
+    </p>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* =====================================================
+   ORG ONBOARDING — FOUNDATION STEP
+===================================================== */
+
+.onboard-wrapper {
+    max-width: 520px;
+    margin: 100px auto;
+}
+
+.onboard-panel {
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.06),
+        rgba(255,255,255,0.02)
+    );
+    border: 1px solid var(--border-soft);
+    border-radius: 22px;
+    padding: 36px;
+}
+
+/* ===============================
+   HEADER
+================================ */
+.onboard-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: .4px;
+}
+
+.onboard-sub {
+    color: var(--text-muted);
+    font-size: .9rem;
+    line-height: 1.6;
+}
+
+/* ===============================
+   FORM CONTROLS
+================================ */
+.form-label {
+    color: var(--text-muted);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+.form-control {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-soft);
+    color: var(--text-primary);
+    border-radius: 14px;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.form-control:focus {
+    background: rgba(255,255,255,0.08);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(99,102,241,.25);
+    color: var(--text-primary);
+}
+
+/* ===============================
+   ACTION BUTTON
+================================ */
+.onboard-action .btn {
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-size: .9rem;
+    font-weight: 500;
+}
+
+/* ===============================
+   SECURITY NOTE
+================================ */
+.security-note {
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-top: 16px;
+    text-align: center;
+}
+</style>
+
+<div class="onboard-wrapper">
+
+    <div class="onboard-panel">
+
+        <!-- ===============================
+             HEADER
+        ================================ -->
+        <div class="mb-4 text-center">
+            <h4 class="onboard-title mb-2">
+                Create Your Organization
+            </h4>
+            <p class="onboard-sub">
+                Business features require an organization.
+                This will become the security boundary for
+                members, vaults, and audit logs.
+            </p>
+        </div>
+
+        <!-- ===============================
+             FORM
+        ================================ -->
+        <form method="post" autocomplete="off">
+
+            <div class="mb-4">
+                <label class="form-label">
+                    Organization Name
+                </label>
+                <input
+                    type="text"
+                    name="name"
+                    class="form-control"
+                    placeholder="e.g. Acme Security Team"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="onboard-action">
+                <button type="submit" class="btn btn-primary w-100">
+                    Create Organization
+                </button>
+            </div>
+
+        </form>
+
+        <!-- ===============================
+             SECURITY NOTE
+        ================================ -->
+        <div class="security-note">
+            This action is permanent and will be recorded in audit logs.
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

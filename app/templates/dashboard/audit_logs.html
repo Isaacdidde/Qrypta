@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* =====================================================
+   AUDIT LOGS — PREMIUM DARK (STABLE)
+===================================================== */
+
+.audit-header h3 {
+    color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: .4px;
+}
+
+.audit-sub {
+    color: var(--text-muted);
+    font-size: .9rem;
+}
+
+.glass-panel {
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.05),
+        rgba(255,255,255,0.02)
+    );
+    border: 1px solid var(--border-soft);
+    border-radius: 20px;
+    padding: 24px;
+}
+
+.audit-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.audit-controls select,
+.audit-controls button,
+.audit-controls a {
+    background: #020617;
+    border: 1px solid var(--border-soft);
+    color: var(--text-secondary);
+    font-size: .75rem;
+    border-radius: 999px;
+    padding: 6px 14px;
+    text-decoration: none;
+}
+
+.audit-controls button:hover,
+.audit-controls a:hover {
+    background: rgba(99,102,241,.12);
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.table-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+}
+
+.table-dark-custom {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-dark-custom th {
+    padding: 14px 16px;
+    font-size: .75rem;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.table-dark-custom td {
+    padding: 14px 16px;
+    font-size: .85rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: top;
+}
+
+.audit-time {
+    display: flex;
+    flex-direction: column;
+}
+
+.audit-date {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.audit-clock {
+    font-size: .7rem;
+    color: var(--text-muted);
+}
+
+.badge-action {
+    background: rgba(99,102,241,.18);
+    color: #c7d2fe;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: .7rem;
+    white-space: nowrap;
+}
+
+.audit-resource {
+    font-size: .75rem;
+    color: var(--text-muted);
+}
+
+.audit-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.meta-chip {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: .7rem;
+    color: var(--text-secondary);
+}
+</style>
+
+<div class="container my-5">
+
+<!-- HEADER -->
+<div class="audit-header mb-3">
+    <h3 class="mb-1">Audit Logs</h3>
+    <div class="audit-sub">
+        Immutable record of security-relevant actions
+        {% if scope == "self" %}
+            — <strong>Your activity</strong>
+        {% elif scope == "platform" %}
+            — <strong>Platform-wide</strong>
+        {% else %}
+            — <strong>Organization-wide</strong>
+        {% endif %}
+    </div>
+</div>
+
+<div class="glass-panel">
+
+    <!-- FILTERS -->
+    <form method="get" class="audit-controls">
+        <select name="sort">
+            <option value="desc" {{ "selected" if sort == "desc" }}>Newest First</option>
+            <option value="asc" {{ "selected" if sort == "asc" }}>Oldest First</option>
+        </select>
+
+        <select name="action">
+            <option value="">All Actions</option>
+            <option value="secret.read" {{ "selected" if filters.get("action") == "secret.read" }}>Secret Read</option>
+            <option value="secret.copied" {{ "selected" if filters.get("action") == "secret.copied" }}>Secret Copied</option>
+            <option value="secret.created" {{ "selected" if filters.get("action") == "secret.created" }}>Secret Created</option>
+            <option value="secret.soft_deleted" {{ "selected" if filters.get("action") == "secret.soft_deleted" }}>Secret Deleted</option>
+        </select>
+
+        <select name="resource_type">
+            <option value="">All Resources</option>
+            <option value="vault" {{ "selected" if filters.get("resource_type") == "vault" }}>Vault</option>
+            <option value="vault_secret" {{ "selected" if filters.get("resource_type") == "vault_secret" }}>Secret</option>
+        </select>
+
+        <button type="submit">Apply</button>
+
+        <a href="{{ request.path }}?{{ request.query_string.decode() }}&export=csv">
+            Export CSV
+        </a>
+    </form>
+
+    {% if logs %}
+    <div class="table-wrapper">
+        <table class="table-dark-custom">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Actor</th>
+                    <th>Action</th>
+                    <th>Resource</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            {% for log in logs %}
+            <tr>
+                <td>
+                    <div class="audit-time">
+                        <span class="audit-date">
+                            {{ log.timestamp.strftime("%d %b %Y") }}
+                        </span>
+                        <span class="audit-clock">
+                            {{ log.timestamp.strftime("%H:%M:%S") }} UTC
+                        </span>
+                    </div>
+                </td>
+
+                <td>{{ log.actor or "System" }}</td>
+
+                <td>
+                    <span class="badge-action">
+                        {{ log.action.replace(".", " ").upper() }}
+                    </span>
+                </td>
+
+                <td>
+                    <div>{{ log.resource_type }}</div>
+                    {% if log.metadata.get("vault_name") %}
+                        <div class="audit-resource">
+                            Vault: {{ log.metadata.get("vault_name") }}
+                        </div>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if log.metadata %}
+                        <div class="audit-meta">
+                            {% if log.metadata.get("secret_name") %}
+                                <span class="meta-chip">
+                                    Secret: {{ log.metadata.get("secret_name") }}
+                                </span>
+                            {% endif %}
+
+                            {% for k, v in log.metadata.items() %}
+                                {% if k not in ["vault_name", "secret_name"] %}
+                                    <span class="meta-chip">
+                                        {{ k.replace("_"," ").title() }}: {{ v }}
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination mt-3 d-flex justify-content-between">
+        <div>
+            Page {{ page }} of {{ pages }} ({{ total }} events)
+        </div>
+        <div>
+            {% if page > 1 %}
+                <a href="?{{ request.query_string.decode() | replace('page=' ~ page, 'page=' ~ (page-1)) }}">
+                    ← Previous
+                </a>
+            {% endif %}
+            {% if page < pages %}
+                <a href="?{{ request.query_string.decode() | replace('page=' ~ page, 'page=' ~ (page+1)) }}"
+                   class="ms-3">
+                    Next →
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% else %}
+        <div class="text-muted text-center py-4">
+            No audit activity yet.
+        </div>
+    {% endif %}
+
+</div>
+</div>
+
+{% endblock %}

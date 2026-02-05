@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<h4>System Stats</h4>
+<ul>
+    <li>Total Users: {{ stats.total_users }}</li>
+    <li>Total Organizations: {{ stats.total_organizations }}</li>
+    <li>Active Users: {{ stats.active_users }}</li>
+</ul>
+
+<h4 class="mt-4">Users</h4>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ "Active" if user.is_active else "Suspended" }}</td>
+            <td>
+                {% if user.is_active %}
+                    <a href="{{ url_for('admin.suspend_user', user_id=user._id) }}" class="btn btn-sm btn-warning">Suspend</a>
+                {% else %}
+                    <a href="{{ url_for('admin.resume_user', user_id=user._id) }}" class="btn btn-sm btn-success">Resume</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

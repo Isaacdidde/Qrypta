@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6">
+
+        <!-- ==================================================
+             HEADER
+             ================================================== -->
+        <h2 class="mb-2 text-center">Create your account</h2>
+        <p class="text-muted mb-4 text-center">
+            Set a strong password. A one-time verification code (OTP)
+            is required every time you log in.
+        </p>
+
+        <!-- ==================================================
+             SECURITY NOTICE
+             ================================================== -->
+        <div class="alert alert-info small">
+            🔐 <strong>Security notice:</strong>
+            Qrypta enforces email-based OTP verification on every login.
+            This is mandatory and cannot be disabled.
+        </div>
+
+        <!-- ==================================================
+             FLASH MESSAGES
+             ================================================== -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- ==================================================
+             REGISTER FORM
+             ================================================== -->
+        <form
+            method="post"
+            action="{{ url_for('auth.register', next=next) }}"
+            novalidate
+        >
+
+            <!-- ================= ACCOUNT TYPE ================= -->
+            <div class="mb-4">
+                <label class="form-label fw-bold d-block">Account type</label>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="account_type"
+                           id="typeIndividual"
+                           value="individual"
+                           checked>
+                    <label class="form-check-label" for="typeIndividual">
+                        Individual
+                    </label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="account_type"
+                           id="typeBusiness"
+                           value="business">
+                    <label class="form-check-label" for="typeBusiness">
+                        Business
+                    </label>
+                </div>
+            </div>
+
+            <!-- ================= INDIVIDUAL ================= -->
+            <div id="individualFields">
+                <h5 class="mb-3">Personal details</h5>
+
+                <div class="mb-3">
+                    <label class="form-label">Full name</label>
+                    <input type="text"
+                           name="full_name"
+                           class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mobile number</label>
+                    <input type="tel"
+                           name="mobile"
+                           class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email address</label>
+                    <input type="email"
+                           name="email"
+                           class="form-control"
+                           required>
+                </div>
+            </div>
+
+            <!-- ================= BUSINESS ================= -->
+            <div id="businessFields" style="display:none;">
+                <h5 class="mb-3">Business details</h5>
+
+                <div class="mb-3">
+                    <label class="form-label">Company name</label>
+                    <input type="text"
+                           name="company_name"
+                           class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Company size</label>
+                    <select name="company_size"
+                            class="form-select">
+                        <option value="">Select size</option>
+                        <option value="1-10">1–10</option>
+                        <option value="11-50">11–50</option>
+                        <option value="51-200">51–200</option>
+                        <option value="200+">200+</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Business email</label>
+                    <input type="email"
+                           name="business_email"
+                           class="form-control">
+                </div>
+            </div>
+
+            <!-- ================= PASSWORD ================= -->
+            <div class="mb-2">
+                <label class="form-label">Password</label>
+
+                <div class="input-group">
+                    <input type="password"
+                           name="password"
+                           id="passwordInput"
+                           class="form-control"
+                           required>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="togglePassword()">
+                        👁
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="copyPassword()">
+                        📋
+                    </button>
+                </div>
+
+                <small class="text-muted">
+                    You will need this password and an OTP for every login.
+                </small>
+            </div>
+
+            <!-- ================= STRENGTH ================= -->
+            <div class="mb-3">
+                <div class="progress" style="height:6px;">
+                    <div id="strengthBar"
+                         class="progress-bar"
+                         style="width:0%"></div>
+                </div>
+                <small id="strengthText" class="text-muted">
+                    Minimum 12 characters with mixed symbols.
+                </small>
+            </div>
+
+            <!-- ================= GENERATE ================= -->
+            <div class="mb-4">
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        onclick="generatePassword()">
+                    Generate strong password
+                </button>
+            </div>
+
+            <!-- ================= SUBMIT ================= -->
+            <button type="submit"
+                    class="btn btn-success w-100">
+                Create account
+            </button>
+
+        </form>
+
+        <hr>
+
+        <p class="mb-0 text-center">
+            Already have an account?
+            <a href="{{ url_for('auth.login', next=next) }}">Sign in</a>
+        </p>
+
+    </div>
+</div>
+
+<!-- ==================================================
+     CLIENT-SIDE LOGIC (SAFE)
+     ================================================== -->
+<script>
+function toggleAccountType() {
+    const isBusiness =
+        document.getElementById("typeBusiness").checked;
+
+    document.getElementById("individualFields").style.display =
+        isBusiness ? "none" : "block";
+
+    document.getElementById("businessFields").style.display =
+        isBusiness ? "block" : "none";
+}
+
+document.getElementById("typeIndividual")
+    .addEventListener("change", toggleAccountType);
+document.getElementById("typeBusiness")
+    .addEventListener("change", toggleAccountType);
+
+document.addEventListener("DOMContentLoaded", toggleAccountType);
+
+// ---------------- PASSWORD STRENGTH ----------------
+const passwordInput = document.getElementById("passwordInput");
+const strengthBar = document.getElementById("strengthBar");
+const strengthText = document.getElementById("strengthText");
+
+passwordInput.addEventListener("input", () => {
+    const v = passwordInput.value;
+    let score = 0;
+
+    if (v.length >= 12) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[a-z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+
+    const pct = (score / 5) * 100;
+    strengthBar.style.width = pct + "%";
+    strengthBar.className = "progress-bar";
+
+    if (score <= 2) {
+        strengthBar.classList.add("bg-danger");
+        strengthText.textContent = "Weak password";
+    } else if (score === 3) {
+        strengthBar.classList.add("bg-warning");
+        strengthText.textContent = "Moderate password";
+    } else {
+        strengthBar.classList.add("bg-success");
+        strengthText.textContent = "Strong password";
+    }
+});
+
+// ---------------- UTILITIES ----------------
+function togglePassword() {
+    passwordInput.type =
+        passwordInput.type === "password" ? "text" : "password";
+}
+
+function copyPassword() {
+    passwordInput.select();
+    document.execCommand("copy");
+    alert("Password copied to clipboard");
+}
+
+function generatePassword() {
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-={}[]<>?";
+    let pwd = "";
+    for (let i = 0; i < 16; i++) {
+        pwd += chars[Math.floor(Math.random() * chars.length)];
+    }
+    passwordInput.value = pwd;
+    passwordInput.type = "text";
+    passwordInput.dispatchEvent(new Event("input"));
+}
+</script>
+
+{% endblock %}

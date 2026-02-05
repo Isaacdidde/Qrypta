@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* =====================================================
+   VAULT VIEW — CORE SECURITY SCREEN
+===================================================== */
+
+/* ===============================
+   HEADER
+================================ */
+.vault-header h3 {
+    color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: .4px;
+}
+
+.vault-sub {
+    color: var(--text-muted);
+    font-size: .85rem;
+}
+
+/* ===============================
+   ACTION BUTTONS
+================================ */
+.vault-actions .btn {
+    border-radius: 999px;
+    font-size: .8rem;
+    padding: 8px 16px;
+}
+
+/* ===============================
+   GLASS PANEL
+================================ */
+.glass-panel {
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.05),
+        rgba(255,255,255,0.02)
+    );
+    border: 1px solid var(--border-soft);
+    border-radius: 20px;
+    padding: 24px;
+}
+
+/* ===============================
+   EMPTY STATE
+================================ */
+.empty-state {
+    text-align: center;
+    padding: 56px 24px;
+    color: var(--text-muted);
+}
+
+.empty-state h5 {
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+/* ===============================
+   TABLE WRAPPER
+================================ */
+.table-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+}
+
+/* ===============================
+   TABLE
+================================ */
+.table-dark-custom {
+    width: 100%;
+    margin: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-dark-custom thead {
+    background: rgba(255,255,255,0.04);
+}
+
+.table-dark-custom thead th {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.table-dark-custom td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.table-dark-custom tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-dark-custom tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+/* ===============================
+   ACTION BUTTONS (ROW)
+================================ */
+.action-btn {
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: .75rem;
+    font-weight: 500;
+    transition: all .2s ease;
+}
+
+.action-outline {
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    color: var(--text-primary);
+}
+
+.action-outline:hover {
+    border-color: var(--accent);
+    background: rgba(99,102,241,.08);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.action-danger {
+    border: 1px solid rgba(239,68,68,.35);
+    color: #ef4444;
+    background: transparent;
+}
+
+.action-danger:hover {
+    background: rgba(239,68,68,.12);
+    box-shadow: 0 0 0 2px rgba(239,68,68,.25);
+}
+</style>
+
+<div class="container my-5">
+
+    <!-- ===============================
+         VAULT HEADER
+    ================================ -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div class="vault-header">
+            <h3 class="mb-1">{{ vault["name"] }}</h3>
+            <div class="vault-sub">
+                {% if vault.get("org_id") %}
+                    Business Vault
+                {% else %}
+                    Personal Vault
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="vault-actions d-flex gap-2">
+            <a href="{{ url_for('vault.create_secret', vault_id=vault['_id']) }}"
+               class="btn btn-primary">
+                Add Secret
+            </a>
+
+            {% if vault.get("org_id") %}
+            <a href="{{ url_for('vault.vault_trash', vault_id=vault['_id']) }}"
+               class="btn btn-outline-light">
+                Trash
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ===============================
+         EMPTY STATE
+    ================================ -->
+    {% if not secrets %}
+        <div class="glass-panel empty-state">
+            <h5>This vault is empty</h5>
+            <p>
+                Vaults are designed to protect sensitive information.
+                Add your first secret to begin securing access.
+            </p>
+
+            <a href="{{ url_for('vault.create_secret', vault_id=vault['_id']) }}"
+               class="btn btn-primary mt-2">
+                Add First Secret
+            </a>
+        </div>
+
+    {% else %}
+
+    <!-- ===============================
+         SECRET LIST
+    ================================ -->
+    <div class="glass-panel">
+        <div class="table-wrapper">
+            <table class="table-dark-custom">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Last Updated</th>
+                        <th style="width: 220px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                {% for secret in secrets %}
+                <tr>
+
+                    <!-- NAME -->
+                    <td>
+                        {{ secret.get("name", "—") }}
+                    </td>
+
+                    <!-- USERNAME -->
+                    <td>
+                        {{ secret.get("username", "—") }}
+                    </td>
+
+                    <!-- TIMESTAMP -->
+                    <td>
+                        {% if secret.get("updated_at") %}
+                            {{ secret["updated_at"].strftime("%Y-%m-%d %H:%M") }}
+                        {% elif secret.get("created_at") %}
+                            {{ secret["created_at"].strftime("%Y-%m-%d %H:%M") }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td>
+                        <div class="d-flex gap-2">
+
+                            <!-- VIEW -->
+                            <a href="{{ url_for('vault.read_secret', secret_id=secret['_id']) }}"
+                               class="action-btn action-outline">
+                                View
+                            </a>
+
+                            <!-- MOVE TO TRASH -->
+                            <form method="post"
+                                  action="{{ url_for('vault.soft_delete_secret', secret_id=secret['_id']) }}"
+                                  onsubmit="return confirm(
+                                      'Move this secret to trash? This action requires organization confirmation.'
+                                  )">
+                                <button class="action-btn action-danger">
+                                    Trash
+                                </button>
+                            </form>
+
+                        </div>
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

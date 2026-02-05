@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* =====================================================
+   VAULT ACCESS — OWNER CONTROLS ADMINS (FINAL)
+===================================================== */
+
+.access-header h3 {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.access-sub {
+    color: var(--text-muted);
+    font-size: .85rem;
+}
+
+.glass-panel {
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.05),
+        rgba(255,255,255,0.02)
+    );
+    border: 1px solid var(--border-soft);
+    border-radius: 20px;
+    padding: 24px;
+}
+
+.table-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+}
+
+.table-dark-custom {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-dark-custom th {
+    font-size: .75rem;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.table-dark-custom td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.perm {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 600;
+}
+
+.perm-owner   { background: rgba(245,158,11,.18); color: #facc15; }
+.perm-admin   { background: rgba(99,102,241,.18); color: #c7d2fe; }
+.perm-read    { background: rgba(99,102,241,.18); color: #c7d2fe; }
+.perm-write   { background: rgba(34,197,94,.18); color: #22c55e; }
+.perm-execute { background: rgba(239,68,68,.18); color: #ef4444; }
+.perm-none    { background: rgba(255,255,255,.12); color: var(--text-muted); }
+
+.action-btn {
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: .75rem;
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    color: var(--text-primary);
+}
+
+.action-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(99,102,241,.10);
+}
+
+.action-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+.action-danger {
+    border-color: rgba(239,68,68,.4);
+    color: #ef4444;
+}
+</style>
+
+<div class="container my-5">
+
+<div class="access-header mb-3">
+    <h3>Manage Vault Access</h3>
+    <div class="access-sub">
+        {{ vault.name }} — Read → Write → Execute
+    </div>
+</div>
+
+<div class="glass-panel">
+<div class="table-wrapper">
+
+<table class="table-dark-custom">
+<thead>
+<tr>
+    <th>Email</th>
+    <th>Permission</th>
+    <th style="width:360px;">Actions</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for m in members %}
+{% set perm = permissions.get(m._id) %}
+{% set current = perm.permission if perm else None %}
+
+<tr>
+    <td>{{ m.email }}</td>
+
+    <!-- PERMISSION -->
+    <td>
+        {% if m.authority == "owner" %}
+            <span class="perm perm-owner">OWNER</span>
+        {% elif m.authority == "admin" %}
+            <span class="perm perm-admin">EXECUTE (ORG)</span>
+        {% elif current == "execute" %}
+            <span class="perm perm-execute">EXECUTE</span>
+        {% elif current == "write" %}
+            <span class="perm perm-write">WRITE</span>
+        {% elif current == "read" %}
+            <span class="perm perm-read">READ</span>
+        {% else %}
+            <span class="perm perm-none">NO ACCESS</span>
+        {% endif %}
+    </td>
+
+    <!-- ACTIONS -->
+    <td>
+
+    <!-- OWNER ROW -->
+    {% if m.authority == "owner" %}
+        <span class="text-muted small">
+            Owner access is immutable
+        </span>
+
+    <!-- ADMIN ROW -->
+    {% elif m.authority == "admin" %}
+        {% if current_user_authority == "owner" %}
+            <!-- Owner managing admin -->
+            <div class="d-flex flex-wrap gap-2">
+                {% for level in ["read", "write", "execute"] %}
+                <form method="post"
+                      action="{{ url_for('vault.grant_access', vault_id=vault._id) }}">
+                    <input type="hidden" name="user_id" value="{{ m._id }}">
+                    <input type="hidden" name="permission" value="{{ level }}">
+                    <button class="action-btn {% if level == 'execute' %}action-danger{% endif %}">
+                        {{ level|capitalize }}
+                    </button>
+                </form>
+                {% endfor %}
+
+                <form method="post"
+                      action="{{ url_for('vault.revoke_access', vault_id=vault._id) }}"
+                      onsubmit="return confirm('Revoke admin access?')">
+                    <input type="hidden" name="user_id" value="{{ m._id }}">
+                    <button class="action-btn">Revoke</button>
+                </form>
+            </div>
+        {% else %}
+            <!-- Admin viewing admin -->
+            <span class="text-muted small">
+                Org-level authority
+            </span>
+        {% endif %}
+
+    <!-- NORMAL USERS -->
+    {% else %}
+        {% if current_user_authority in ["owner", "admin"] %}
+        <div class="d-flex flex-wrap gap-2">
+
+            {% for level in ["read", "write", "execute"] %}
+            <form method="post"
+                  action="{{ url_for('vault.grant_access', vault_id=vault._id) }}">
+                <input type="hidden" name="user_id" value="{{ m._id }}">
+                <input type="hidden" name="permission" value="{{ level }}">
+                <button
+                    class="action-btn {% if level == 'execute' %}action-danger{% endif %}"
+                    {% if current == level %}disabled{% endif %}
+                >
+                    {{ level|capitalize }}
+                </button>
+            </form>
+            {% endfor %}
+
+            {% if current %}
+            <form method="post"
+                  action="{{ url_for('vault.revoke_access', vault_id=vault._id) }}"
+                  onsubmit="return confirm('Revoke all access?')">
+                <input type="hidden" name="user_id" value="{{ m._id }}">
+                <button class="action-btn">Revoke</button>
+            </form>
+            {% endif %}
+
+        </div>
+        {% else %}
+            <span class="text-muted small">—</span>
+        {% endif %}
+    {% endif %}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+</div>
+
+<a href="{{ url_for('vault.dashboard') }}"
+   class="action-btn mt-3">
+   ← Back to Vaults
+</a>
+
+</div>
+{% endblock %}

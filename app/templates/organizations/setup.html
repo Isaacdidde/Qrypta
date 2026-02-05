@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5" style="max-width: 640px;">
+
+    <h2 class="mb-2">Set up your organization</h2>
+    <p class="text-muted mb-4">
+        You’re the owner. Create your organization to start inviting members
+        and managing access.
+    </p>
+
+    <!-- ==================================================
+         SECURITY NOTE
+         ================================================== -->
+    <div class="alert alert-info small">
+        🔐 <strong>Owner privileges:</strong>
+        You’ll be able to invite users, assign roles, manage departments,
+        and control vault access.
+    </div>
+
+    <!-- ==================================================
+         FLASH MESSAGES
+         ================================================== -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- ==================================================
+         ORGANIZATION FORM
+         ================================================== -->
+    <form method="post" novalidate>
+
+        <!-- ORGANIZATION NAME -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">Organization Name</label>
+            <input
+                type="text"
+                name="organization_name"
+                class="form-control"
+                placeholder="e.g. Dcorp Ads"
+                required
+                autofocus
+            >
+            <small class="text-muted">
+                This will be visible to all members.
+            </small>
+        </div>
+
+        <!-- OPTIONAL DESCRIPTION -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">Description (optional)</label>
+            <textarea
+                name="description"
+                class="form-control"
+                rows="3"
+                placeholder="What does your organization do?"
+            ></textarea>
+        </div>
+
+        <!-- DEFAULT DEPARTMENT -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">Default Department</label>
+            <input
+                type="text"
+                name="default_department"
+                class="form-control"
+                placeholder="General"
+                value="General"
+            >
+            <small class="text-muted">
+                New members will be assigned here by default.
+            </small>
+        </div>
+
+        <!-- SUBMIT -->
+        <button type="submit" class="btn btn-primary w-100">
+            Create Organization
+        </button>
+
+    </form>
+
+    <!-- ==================================================
+         FOOTER
+         ================================================== -->
+    <p class="text-muted text-center small mt-4">
+        You can rename or update organization details later.
+    </p>
+
+</div>
+
+{% endblock %}

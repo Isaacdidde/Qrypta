@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>User Dashboard</h2>
+
+<ul class="list-group">
+    <li class="list-group-item">
+        <a href="{{ url_for('vault.dashboard') }}">My Vault</a>
+    </li>
+    <li class="list-group-item">
+        <a href="{{ url_for('users.profile') }}">Profile Settings</a>
+    </li>
+</ul>
+{% endblock %}

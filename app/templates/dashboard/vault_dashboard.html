@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* =====================================================
+   VAULT DASHBOARD — PREMIUM DARK GLASS (FINAL)
+===================================================== */
+
+/* ---------- TYPOGRAPHY ---------- */
+.vault-header h2 {
+    font-weight: 800;
+    letter-spacing: .4px;
+    color: var(--text-primary);
+}
+
+.vault-sub {
+    font-size: .9rem;
+    color: var(--text-muted);
+    max-width: 560px;
+}
+
+/* ---------- GLASS PANEL ---------- */
+.glass-panel {
+    position: relative;
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.06),
+        rgba(255,255,255,0.02)
+    );
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border-soft);
+    border-radius: 22px;
+    padding: 26px;
+}
+
+/* subtle grain texture */
+.glass-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='140' height='140' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* ---------- BADGES ---------- */
+.badge-personal {
+    background: rgba(255,255,255,.14);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: .75rem;
+}
+
+.badge-business {
+    background: linear-gradient(135deg,#6366f1,#22d3ee);
+    color: #020617;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+/* ---------- ACCESS BADGES ---------- */
+.badge-access-owner   { background: rgba(245,158,11,.18); color:#facc15; }
+.badge-access-org     { background: rgba(99,102,241,.18); color:#c7d2fe; }
+.badge-access-execute { background: rgba(239,68,68,.18); color:#ef4444; }
+.badge-access-write   { background: rgba(34,197,94,.18); color:#22c55e; }
+.badge-access-read    { background: rgba(59,130,246,.18); color:#3b82f6; }
+.badge-access-none    { background: rgba(148,163,184,.18); color:#94a3b8; }
+
+.badge-access-owner,
+.badge-access-org,
+.badge-access-execute,
+.badge-access-write,
+.badge-access-read,
+.badge-access-none {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+/* ---------- TABLE ---------- */
+.table-wrapper {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+}
+
+.table-dark-custom {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-dark-custom thead th {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-muted);
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.table-dark-custom td {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+/* ---------- ACTION BUTTONS ---------- */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 7px 18px;
+    font-size: .75rem;
+    font-weight: 600;
+    border: 1px solid var(--border-soft);
+    background: rgba(255,255,255,.04);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all .18s ease;
+}
+
+.action-btn:hover {
+    border-color: var(--accent);
+    background: rgba(99,102,241,.12);
+    transform: translateY(-1px);
+}
+
+/* ---------- CREATE FORM ---------- */
+.create-input {
+    background: rgba(255,255,255,.05);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: var(--text-primary);
+    border: 1px solid var(--border-soft);
+}
+
+.create-input::placeholder {
+    color: var(--text-muted);
+}
+
+.create-btn {
+    border-radius: 999px;
+    padding: 8px 22px;
+    font-size: .8rem;
+    font-weight: 600;
+}
+</style>
+
+<div class="container my-5">
+
+<!-- HEADER -->
+<div class="vault-header mb-4">
+    <h2 class="mb-1">Vaults</h2>
+    <div class="vault-sub">
+        Secure containers for credentials, API keys, and sensitive secrets.
+    </div>
+</div>
+
+<!-- CREATE VAULT -->
+{% if current_user.account_type == "individual" or is_owner or is_admin %}
+<div class="glass-panel mb-4">
+    <h6 class="mb-3 fw-semibold">Create New Vault</h6>
+
+    <form method="post" action="{{ url_for('vault.create_vault') }}">
+        <input
+            type="text"
+            name="name"
+            class="form-control create-input mb-3"
+            placeholder="e.g. Production Secrets"
+            required
+        >
+        <button class="btn btn-outline-light create-btn">
+            Create Vault
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<!-- VAULT LIST -->
+<div class="glass-panel">
+<h6 class="mb-3 fw-semibold">Available Vaults</h6>
+
+{% if vaults %}
+<div class="table-wrapper">
+<table class="table-dark-custom">
+<thead>
+<tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Access</th>
+    <th>Created</th>
+    <th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+{% for vault in vaults %}
+<tr>
+    <td><strong>{{ vault.name }}</strong></td>
+
+    <td>
+        {% if vault.org_id %}
+            <span class="badge-business">Business</span>
+        {% else %}
+            <span class="badge-personal">Personal</span>
+        {% endif %}
+    </td>
+
+    <!-- ACCESS -->
+    <td>
+        {% if vault.is_owner %}
+            <span class="badge-access-owner">Owner</span>
+
+        {% elif vault.access_level == "execute" and is_admin %}
+            <span class="badge-access-org">Execute (ORG)</span>
+
+        {% elif vault.access_level == "execute" %}
+            <span class="badge-access-execute">Execute</span>
+
+        {% elif vault.access_level == "write" %}
+            <span class="badge-access-write">Write</span>
+
+        {% elif vault.access_level == "read" %}
+            <span class="badge-access-read">Read</span>
+
+        {% else %}
+            <span class="badge-access-none">No Access</span>
+        {% endif %}
+    </td>
+
+    <td>
+        {{ vault.created_at.strftime("%d %b %Y %H:%M") }} UTC
+    </td>
+
+    <!-- ACTIONS -->
+    <td class="text-nowrap">
+        <a href="{{ url_for('vault.view_vault', vault_id=vault._id) }}"
+           class="action-btn">
+            Open
+        </a>
+
+        {% if vault.org_id and (is_owner or is_admin) %}
+        <a href="{{ url_for('vault.manage_access', vault_id=vault._id) }}"
+           class="action-btn">
+            Access
+        </a>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="text-muted text-center py-4">
+    No vaults available yet.
+</div>
+{% endif %}
+</div>
+
+</div>
+
+{% endblock %}
+

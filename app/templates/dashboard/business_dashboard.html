@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* ==================================================
+   PREMIUM GLASS DASHBOARD THEME
+================================================== */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.dashboard-header h2 {
+    color: #f9fafb;
+}
+
+.dashboard-header small {
+    color: #9ca3af;
+}
+
+/* ==================================================
+   ROLE INDICATOR
+================================================== */
+.role-indicator {
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    background: linear-gradient(135deg, #6366f1, #38bdf8);
+    color: #020617;
+}
+
+/* ==================================================
+   GLASS PANEL
+================================================== */
+.glass-panel {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 28px;
+    backdrop-filter: blur(16px);
+}
+
+/* ==================================================
+   FILTER BAR
+================================================== */
+.filter-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+/* WHITE DROPDOWNS (FIXED) */
+.filter-bar select {
+    background: #ffffff;
+    color: #020617;
+    border: 1px solid rgba(0,0,0,.15);
+    font-size: .75rem;
+    border-radius: 999px;
+    padding: 6px 18px;
+}
+
+.filter-bar select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(99,102,241,.4);
+}
+
+/* FILTER BUTTON */
+.filter-bar button {
+    background: linear-gradient(135deg, #6366f1, #38bdf8);
+    color: #020617;
+    border: none;
+    font-size: .75rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 6px 20px;
+    cursor: pointer;
+}
+
+.filter-bar button:hover {
+    opacity: .9;
+}
+
+/* ==================================================
+   TABLE
+================================================== */
+.table-wrapper {
+    border-radius: 18px;
+    overflow-x: auto;
+    border: 1px solid rgba(255,255,255,0.12);
+}
+
+.table-dark-custom {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-dark-custom th {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #9ca3af;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.04);
+}
+
+.table-dark-custom td {
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+    font-size: .8rem;
+    color: #f1f5f9;
+}
+
+.table-dark-custom tr:hover td {
+    background: rgba(255,255,255,0.05);
+}
+
+/* ==================================================
+   BADGES
+================================================== */
+.badge {
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: .65rem;
+    font-weight: 800;
+}
+
+.badge-active {
+    background: rgba(16,185,129,.15);
+    color: #34d399;
+}
+
+.badge-suspended {
+    background: rgba(239,68,68,.15);
+    color: #f87171;
+}
+
+/* ==================================================
+   ACTION BUTTONS (PREMIUM)
+================================================== */
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 6px 16px;
+    font-size: .7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06);
+    color: #f9fafb;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+
+.action-btn:hover {
+    background: rgba(99,102,241,.15);
+    border-color: rgba(99,102,241,.6);
+    color: #e0e7ff;
+}
+
+/* DANGER */
+.action-btn.danger {
+    border-color: rgba(239,68,68,.5);
+    color: #f87171;
+}
+
+.action-btn.danger:hover {
+    background: rgba(239,68,68,.15);
+    border-color: rgba(239,68,68,.8);
+}
+
+/* ==================================================
+   INVITE BUTTON
+================================================== */
+.invite-btn {
+    padding: 8px 20px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #6366f1, #38bdf8);
+    color: #020617;
+    font-size: .75rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: opacity .25s ease;
+}
+
+.invite-btn:hover {
+    opacity: .9;
+}
+</style>
+
+<div class="container my-5">
+
+<!-- ==================================================
+     HEADER
+================================================== -->
+<div class="dashboard-header mb-4">
+    <div>
+        <h2 class="mb-1">
+            {{ organization.name if organization else "Organization Dashboard" }}
+        </h2>
+        <small>Security & access overview</small>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        {% if is_owner %}
+            <span class="role-indicator">OWNER</span>
+        {% elif is_admin %}
+            <span class="role-indicator">ADMIN</span>
+        {% elif is_manager %}
+            <span class="role-indicator">MANAGER</span>
+        {% endif %}
+
+        {% if is_owner or is_admin %}
+            <a href="{{ url_for('organizations.invite_member') }}" class="invite-btn">
+                + Invite Member
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="glass-panel">
+
+<!-- ==================================================
+     FILTERS
+================================================== -->
+<form method="get" class="filter-bar">
+    <select name="sort">
+        <option value="new" {{ "selected" if sort == "new" }}>Newest</option>
+        <option value="old" {{ "selected" if sort == "old" }}>Oldest</option>
+        <option value="az" {{ "selected" if sort == "az" }}>A–Z</option>
+        <option value="za" {{ "selected" if sort == "za" }}>Z–A</option>
+    </select>
+
+    <select name="role">
+        <option value="">All Roles</option>
+        <option value="employee" {{ "selected" if role_filter == "employee" }}>Employee</option>
+        <option value="manager" {{ "selected" if role_filter == "manager" }}>Manager</option>
+    </select>
+
+    <button type="submit">Apply</button>
+</form>
+
+<h6 class="mb-3 text-white">Members</h6>
+
+<!-- ==================================================
+     TABLE
+================================================== -->
+<div class="table-wrapper">
+<table class="table-dark-custom">
+<thead>
+<tr>
+    <th>Email</th>
+    <th>Role</th>
+    <th>Department</th>
+    <th>Admin</th>
+    <th>Status</th>
+    <th>Last Login</th>
+    {% if is_owner or is_admin %}<th>Actions</th>{% endif %}
+</tr>
+</thead>
+
+<tbody>
+{% if members %}
+{% for member in members %}
+<tr>
+    <td>{{ member.email }}</td>
+    <td>
+        {{ "Owner" if member.authority == "owner"
+           else "Manager" if member.role == "manager"
+           else "Employee" }}
+    </td>
+    <td>{{ member.department or "—" }}</td>
+    <td>{{ "Yes" if member.authority in ["owner","admin"] else "No" }}</td>
+    <td>
+        <span class="badge {{ 'badge-active' if member.status == 'active' else 'badge-suspended' }}">
+            {{ member.status|capitalize }}
+        </span>
+    </td>
+    <td>
+        {{ (member.last_login | ist).strftime("%d %b %Y %H:%M") 
+
+           if member.last_login else "—" }}
+    </td>
+
+    {% if is_owner or is_admin %}
+    <td>
+        <div class="actions">
+
+        {% if is_owner and member.authority == "member" %}
+        <form method="post" action="{{ url_for('organizations.grant_admin', user_id=member.user_id) }}">
+            <button class="action-btn">Make Admin</button>
+        </form>
+        {% endif %}
+
+        {% if is_owner and member.authority == "admin" %}
+        <form method="post" action="{{ url_for('organizations.revoke_admin', user_id=member.user_id) }}">
+            <button class="action-btn">Remove Admin</button>
+        </form>
+        {% endif %}
+
+        {% if is_admin and member.status == "active" and member.authority != "owner" %}
+        <form method="post" action="{{ url_for('organizations.suspend_member', user_id=member.user_id) }}">
+            <button class="action-btn">Suspend</button>
+        </form>
+        {% endif %}
+
+        {% if is_admin and member.status == "suspended" %}
+        <form method="post" action="{{ url_for('organizations.reactivate_member', user_id=member.user_id) }}">
+            <button class="action-btn">Reactivate</button>
+        </form>
+        {% endif %}
+
+        {% if is_owner and member.authority != "owner" %}
+        <form method="post" action="{{ url_for('organizations.remove_member', user_id=member.user_id) }}">
+            <button class="action-btn danger">Remove</button>
+        </form>
+        {% endif %}
+
+        </div>
+    </td>
+    {% endif %}
+</tr>
+{% endfor %}
+{% else %}
+<tr>
+    <td colspan="7" class="text-center text-muted py-4">
+        No members found.
+    </td>
+</tr>
+{% endif %}
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+
+{% endblock %}
