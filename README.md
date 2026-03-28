@@ -1,7 +1,7 @@
 # Qrypta 🔐  
 ### Secure Password Manager with Vaults, RBAC, 2FA & Audit Logging
 
-Qrypta is a **security-first password management system** designed to securely store sensitive secrets inside encrypted vaults while enforcing **strong authentication, role-based access control, and full auditability**.  
+Qrypta is a **security-first password management system** designed to securely store sensitive secrets inside encrypted vaults while enforcing **strong authentication, role-based access control, and full auditability**.
 The application is built with a modular backend architecture that reflects real-world enterprise security design principles.
 
 Qrypta focuses on **confidentiality, integrity, accountability, and least-privilege access**, making it suitable as a learning, research, and portfolio project for cybersecurity and backend engineering roles.
